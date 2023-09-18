@@ -1,25 +1,91 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import './App.css'
 
-function App() {
+function validatePincode(pincode) {
+  // ตรวจสอบความยาวของ pincode
+  if (pincode.length < 6) {
+    return false;
+  }
+
+  // ตรวจสอบเลขซ้ำติดกันเกิน 2 ตัว
+  for (let i = 0; i < pincode.length - 2; i++) {
+    if (
+      pincode[i] === pincode[i + 1] &&
+      pincode[i] === pincode[i + 2]
+    ) {
+      return false;
+    }
+  }
+
+  // ตรวจสอบเลขเรียงกันเกิน 2 ตัว จากหน้าไปหลัง
+  for (let i = 0; i < pincode.length - 2; i++) {
+    if (
+      parseInt(pincode[i]) + 1 === parseInt(pincode[i + 1]) &&
+      parseInt(pincode[i]) + 2 === parseInt(pincode[i + 2])
+    ) {
+      return false;
+    }
+  }
+
+  // ตรวจสอบเลขเรียงกันเกิน 2 ตัว จากหลังไปหน้า
+  for (let i = 0; i < pincode.length - 2; i++) {
+    if (
+      parseInt(pincode[i]) - 1 === parseInt(pincode[i + 1]) &&
+      parseInt(pincode[i]) - 2 === parseInt(pincode[i + 2])
+    ) {
+      return false;
+    }
+  }
+
+  // ตรวจสอบเลขชุดซ้ำเกิน 2 ชุด
+  const digitCounts = {};
+  for (let i = 0; i < pincode.length; i++) {
+    const digit = pincode[i];
+    if (digitCounts[digit]) {
+      digitCounts[digit]++;
+    } else {
+      digitCounts[digit] = 1;
+    }
+  }
+
+  let count = 0;
+  for (const digit in digitCounts) {
+    if (digitCounts[digit] > 1) {
+      count++
+    }
+    if (count > 2) {
+      return false
+    }
+  }
+
+  return true;
+}
+
+function PincodeValidator() {
+  const [pincode, setPincode] = useState('');
+  const [isValid, setIsValid] = useState(null);
+
+  const handlePincodeChange = (e) => {
+    const newPincode = e.target.value;
+    setPincode(newPincode);
+    setIsValid(validatePincode(newPincode));
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='center'>
+      <input
+        type="text"
+        value={pincode}
+        onChange={handlePincodeChange}
+        placeholder="กรอก Pincode"
+      />
+      {isValid === null ? null : isValid ? (
+        <p className="valid">Pincode ✅</p>
+      ) : (
+        <p className="invalid">Pincode ❌</p>
+      )}
     </div>
   );
 }
 
-export default App;
+export default PincodeValidator;
